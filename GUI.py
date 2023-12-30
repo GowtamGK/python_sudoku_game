@@ -1,20 +1,22 @@
 # GUI.py
 import pygame
+from solver import solve_board
 import time
+import random
 pygame.font.init()
 
 
 class Grid:
     board = [
-        [7, 8, 0, 4, 0, 0, 1, 2, 0],
-        [6, 0, 0, 0, 7, 5, 0, 0, 9],
-        [0, 0, 0, 6, 0, 1, 0, 7, 8],
-        [0, 0, 7, 0, 4, 0, 2, 6, 0],
-        [0, 0, 1, 0, 5, 0, 9, 3, 0],
-        [9, 0, 4, 0, 6, 0, 0, 0, 5],
-        [0, 7, 0, 3, 0, 0, 0, 1, 2],
-        [1, 2, 0, 0, 0, 7, 4, 0, 0],
-        [0, 4, 9, 2, 0, 6, 0, 0, 7]
+        [3, 0, 0, 8, 0, 0, 0, 0, 1],
+        [0, 0, 0, 0, 0, 2, 0, 0, 0],
+        [0, 4, 1, 5, 0, 0, 8, 3, 0],
+        [0, 2, 0, 0, 0, 1, 0, 0, 0],
+        [8, 5, 0, 4, 0, 3, 0, 1, 7],
+        [0, 0, 0, 7, 0, 0, 0, 2, 0],
+        [0, 8, 5, 0, 0, 9, 7, 4, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0, 0],
+        [9, 0, 0, 0, 0, 7, 0, 0, 6]
     ]
 
 
@@ -28,6 +30,27 @@ class Grid:
         self.update_model()
         self.selected = None
         self.win = win
+
+    def generate_board(self):
+        # Initialize an empty board
+        self.board = [[0 for _ in range(self.cols)] for _ in range(self.rows)]
+
+        solve_board(self.board)
+
+        # Creating a solved Sudoku board and randomly remove numbers to create the puzzle
+        for _ in range(40):  # Adjust the number of iterations to control the difficulty
+            row = random.randint(0, 8)
+            col = random.randint(0, 8)
+            while self.board[row][col] == 0:
+                row = random.randint(0, 8)
+                col = random.randint(0, 8)
+            self.board[row][col] = 0  # Replace some values with 0 to create empty cells
+
+        # Update the cubes with the newly generated board
+        for i in range(self.rows):
+            for j in range(self.cols):
+                self.cubes[i][j].set(self.board[i][j])
+        self.update_model()
 
     def update_model(self):
         self.model = [[self.cubes[i][j].value for j in range(self.cols)] for i in range(self.rows)]
@@ -263,6 +286,9 @@ def main():
     run = True
     start = time.time()
     strikes = 0
+    # Generate a new random board
+    board.generate_board()
+
     while run:
 
         play_time = round(time.time() - start)
